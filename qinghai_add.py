@@ -4,7 +4,7 @@ import os
 import glob
 
 # 定义栅格文件夹路径
-raster_folder = r"C:\Users\r\Desktop\ts_analysis\gansu\extracted"
+raster_folder = r"C:\Users\r\Desktop\ts_analysis\qinghai\extracted"
 
 # 获取文件夹中所有的 .tif 文件
 raster_files = glob.glob(os.path.join(raster_folder, "*.tif"))
@@ -53,12 +53,14 @@ for raster_path in raster_files:
     except Exception as e:
         print(f"Error processing {raster_path}: {e}")
 
+import arcpy
 
 count_field = "Count"  # 属性表中像素计数字段名称
 value_field = "SymLab"  # 栅格值字段名
+
 for raster_path in raster_files:
     print(f"Processing {raster_path} step2")
-# 原始 land_cover_map 映射（原始名称）
+    # 原始 land_cover_map 映射（原始名称）
     land_cover_map_original = {
         1: 'Evergreen_Needleleaf_Forests',
         2: 'Evergreen_Broadleaf_Forests',
@@ -114,6 +116,7 @@ for raster_path in raster_files:
         if value != "Unclassified":  # 过滤掉 'Unclassified' 栅格值
             value_count[value] = count
             total_pixels += count  # 累加总像素数
+
     # 排序并获取前4个值
     sorted_values = sorted(value_count.items(), key=lambda x: x[1], reverse=True)
     top_4_values = [item[0] for item in sorted_values[:4]]
@@ -132,7 +135,7 @@ for raster_path in raster_files:
     for value in top_5_values:
         print(f"Value: {value}, Pixel Count: {value_count.get(value, 0)}, Percentage: {calculate_percentage(value):.2f}%")
 
-
+   
     # 创建新的字段 "Top_4_Labels" 用于存储前4个分类，其他分类为 "Others"
     new_field = "Top4"
     if new_field not in [f.name for f in arcpy.ListFields(raster_path)]:
@@ -143,7 +146,7 @@ for raster_path in raster_files:
         for row in cursor:
             value = row[0]
             # 如果 SymLab 中的值在前4个分类中，使用缩写替换值，否则为 "Others"
-            if value in top_4_values:
+            if value in top_5_values:
                 # 获取该 SymLab 分类对应的编号，从而查找 land_cover_map 中的缩写
                 value_number = list(land_cover_map_original.keys())[list(land_cover_map_original.values()).index(value)]
                 new_value = land_cover_map.get(value_number, "Others")  # 用编号查找缩写
@@ -154,4 +157,4 @@ for raster_path in raster_files:
                 row[1] = "Others"  # 其他值标记为 "Others"
             cursor.updateRow(row)
 
-    print(f"Field '{new_field}' updated with top 4 labels and 'Others' for other categories.")
+    print(f"Field '{new_field}' updated with top5 labels and 'Others' for other categories.")

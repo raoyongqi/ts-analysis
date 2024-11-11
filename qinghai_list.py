@@ -1,7 +1,7 @@
 import arcpy
 import pandas as pd
 # 定义栅格文件路径
-tif_file = r"C:\Users\r\Desktop\ts_analysis\gansu\extracted\extracted_gansu_idgp_2001.tif"
+tif_file = r"C:\Users\r\Desktop\ts_analysis\qinghai\extracted\extracted_qinghai_idgp_2001.tif"
 
 # 检查栅格文件是否存在
 if arcpy.Exists(tif_file):
@@ -26,15 +26,15 @@ if arcpy.Exists(tif_file):
         # 按照 Count 值降序排序
         sorted_value_count = sorted(value_count.items(), key=lambda x: x[1], reverse=True)
 
-        # 获取前4个最大的分类
-        top_4 = sorted_value_count[:4]
+        # 获取前5个最大的分类
+        top_5 = sorted_value_count[:5]
 
-        # 输出前4个按像素计数从大到小排序的 SymLab 分类名称，不包含 Count 值
-        top_4_values = [sym_lab_value for sym_lab_value, count in top_4]
-        top_4_values.insert(0, 'year')
+        # 输出前5个按像素计数从大到小排序的 SymLab 分类名称，不包含 Count 值
+        top_5_values = [sym_lab_value for sym_lab_value, count in top_5]
+        top_5_values.insert(0, 'year')
         # 在列表末尾添加 '其他'
-        top_4_values.append('Other')
-        df = pd.DataFrame(columns=top_4_values)
+        top_5_values.append('Other')
+        df = pd.DataFrame(columns=top_5_values)
     else:
         print(f"栅格文件中没有找到 'SymLab' 字段。")
 else:
@@ -44,7 +44,7 @@ else:
 import os
 import glob
 # 定义栅格文件夹路径
-raster_folder = r"C:\Users\r\Desktop\ts_analysis\gansu\extracted"
+raster_folder = r"C:\Users\r\Desktop\ts_analysis\qinghai\extracted"
 
 # 获取文件夹中所有的 .tif 文件
 raster_files = glob.glob(os.path.join(raster_folder, "*.tif"))
@@ -63,13 +63,13 @@ for raster_path in raster_files:
     # 使用 SearchCursor 遍历数据
     with arcpy.da.SearchCursor(raster_path, [sym_lab_field, "Count"]) as cursor:
         for row in cursor:
-            # 如果 SymLab 字段的值在 top_4_values 中，保存对应的 Count 值
+            # 如果 SymLab 字段的值在 top_5_values 中，保存对应的 Count 值
             total_count += row[1]
-            if row[0] in top_4_values[1:]:
+            if row[0] in top_5_values[1:]:
                 value_count_dict[row[0]] = row[1]
 
             else:
-                other_count += row[1]  # 累加不在 top_4_values 中的 Count
+                other_count += row[1]  # 累加不在 top_5_values 中的 Count
 
 
 
@@ -77,7 +77,7 @@ for raster_path in raster_files:
         if total_count > 0:
             # 计算每个分类的百分比
             percentage_list = [year]  # 初始化列表，第一个是年份
-            for class_name in top_4_values[1:5]:
+            for class_name in top_5_values[1:6]:
                 count_value = value_count_dict.get(class_name, 0)
                 percentage = (count_value / total_count) * 100  # 计算百分比
                 
@@ -99,16 +99,16 @@ header_translation = {
     "Grasslands": "草地",
     "Croplands": "耕地",
     "Deciduous_Broadleaf_Forests": "落叶阔叶林",
-    "Other": "其他"  # 添加“其他”类别的翻译
+    "Other": "其他",  # 添加“其他”类别的翻译
+    "Permanent_Snow_and_Ice": "永久雪冰",  # 添加 Permanent_Snow_and_Ice 的翻译
+    "Water_Bodies": "水体"  # 添加 Water_Body 的翻译
 }
-
-
 # 使用字典转换表头
 translated_columns = [header_translation.get(col, col) for col in df.columns]
 
 # 将转换后的表头赋值给 DataFrame
 df.columns = columns = translated_columns
-level_1 = ['甘肃省的土地利用情况'] * len(df.columns)
+level_1 = ['青海省的土地利用情况'] * len(df.columns)
 
 # 创建多级表头 (一级和二级)
 multi_index = pd.MultiIndex.from_tuples([(level_1[i], columns[i]) for i in range(len(columns))], names=['一级表头', '二级表头'])

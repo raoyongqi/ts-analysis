@@ -1,7 +1,7 @@
 import arcpy
 import pandas as pd
 # 定义栅格文件路径
-tif_file = r"C:\Users\r\Desktop\ts_analysis\gansu\extracted\extracted_gansu_idgp_2001.tif"
+tif_file = r"C:\Users\r\Desktop\ts_analysis\neimeng\extracted\extracted_neimeng_idgp_2001.tif"
 
 # 检查栅格文件是否存在
 if arcpy.Exists(tif_file):
@@ -44,7 +44,7 @@ else:
 import os
 import glob
 # 定义栅格文件夹路径
-raster_folder = r"C:\Users\r\Desktop\ts_analysis\gansu\extracted"
+raster_folder = r"C:\Users\r\Desktop\ts_analysis\neimeng\extracted"
 
 # 获取文件夹中所有的 .tif 文件
 raster_files = glob.glob(os.path.join(raster_folder, "*.tif"))
@@ -92,23 +92,27 @@ for raster_path in raster_files:
         # 将数据添加到 DataFrame 中
         df.loc[len(df)] = percentage_list
 
-# 英文到中文的转换字典
 header_translation = {
     "year": "年份",
     "Barren_or_Sparsely_Vegetated": "荒地或稀疏植被",
     "Grasslands": "草地",
     "Croplands": "耕地",
     "Deciduous_Broadleaf_Forests": "落叶阔叶林",
-    "Other": "其他"  # 添加“其他”类别的翻译
+    "Evergreen_Broadleaf_Forests": "常绿阔叶林",  # 新增常绿阔叶林的翻译
+    "Evergreen_Needleleaf_Forests": "常绿针叶林",  # 新增常绿针叶林的翻译
+    "Other": "其他",  # 添加“其他”类别的翻译
+    "Permanent_Snow_and_Ice": "永久雪冰",  # 添加 Permanent_Snow_and_Ice 的翻译
+    "Water_Bodies": "水体",  # 添加 Water_Body 的翻译
+    "Woody_Savannas": "林木稀树草原",  # 新增林木稀树草原的翻译
+    "Savannas": "稀树草原"  # 新增稀树草原的翻译
 }
-
 
 # 使用字典转换表头
 translated_columns = [header_translation.get(col, col) for col in df.columns]
 
 # 将转换后的表头赋值给 DataFrame
 df.columns = columns = translated_columns
-level_1 = ['甘肃省的土地利用情况'] * len(df.columns)
+level_1 = ['内蒙古自治区的土地利用情况'] * len(df.columns)
 
 # 创建多级表头 (一级和二级)
 multi_index = pd.MultiIndex.from_tuples([(level_1[i], columns[i]) for i in range(len(columns))], names=['一级表头', '二级表头'])
