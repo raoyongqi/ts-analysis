@@ -117,5 +117,9 @@ multi_index = pd.MultiIndex.from_tuples([(level_1[i], columns[i]) for i in range
 df.columns = multi_index
 # from pandasgui import show
 # # 输出 DataFrame 查看
+df.to_csv('gansu_land_use.csv', index=False)
 df = df.to_string(index=False)
 print(df)
+
+
+
